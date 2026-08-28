@@ -1,0 +1,17 @@
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Java / Maven (Backend)
+adventure-book-engine/target/
+adventure-book-engine/.flattened-pom.xml
+
+# Node / Angular (Frontend)
+adventure-book-ui/node_modules/
+adventure-book-ui/dist/
+adventure-book-ui/.angular/
+
+# OS System files
+.DS_Store
+Thumbs.db

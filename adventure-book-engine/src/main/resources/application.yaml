@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: adventure-book-engine
+
+  # Virtual Threads
+  threads:
+    virtual:
+      enabled: true
+
+  # Docker
+  docker:
+    compose:
+      enabled: false
+
+# Swagger / OpenAPI
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+# Logs
+logging:
+  level:
+    root: INFO
+    com.pictet.adventure: DEBUG
