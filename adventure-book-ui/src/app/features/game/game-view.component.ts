@@ -1,18 +1,21 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { GameService } from '../../core/services/game.service';
 import { HeaderStatusComponent } from './components/header-status/header-status.component';
 import { SectionReaderComponent } from './components/section-reader/section-reader.component';
 import { GameOverModalComponent } from './components/game-over-modal/game-over-modal.component';
 import { Option } from '../../core/models/book.model';
+import { BookService } from '../../core/services/book.service';
 
 @Component({
   selector: 'app-game-view',
   standalone: true,
   imports: [CommonModule, HeaderStatusComponent, SectionReaderComponent, GameOverModalComponent],
   template: `
-    @if (currentBook() && currentSection()) {
+    @if (isLoading()) {
+      <div class="loading">Loading session...</div>
+    } @else if (currentBook() && currentSection()) {
       <div class="game-container">
         <app-header-status
           [bookTitle]="currentBook()!.title"
@@ -38,7 +41,7 @@ import { Option } from '../../core/models/book.model';
         }
       </div>
     } @else {
-      <div class="loading">Loading session...</div>
+      <div class="loading">No game session. Please start a new game.</div>
     }
   `,
   styles: [
@@ -52,19 +55,23 @@ import { Option } from '../../core/models/book.model';
         text-align: center;
         padding: 4rem;
         color: #64748b;
+        font-size: 1.2rem;
       }
     `,
   ],
 })
-export class GameViewComponent {
+export class GameViewComponent implements OnInit {
   private readonly gameService = inject(GameService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly bookService = inject(BookService);
 
   readonly currentBook = this.gameService.currentBook;
   readonly currentSection = this.gameService.currentSection;
   readonly healthPoints = this.gameService.health;
   readonly isGameOver = this.gameService.isGameOver;
   readonly isVictorious = this.gameService.isVictorious;
+  readonly isLoading = this.gameService.isLoading;
 
   gameOverMessage = computed(() => {
     if (this.healthPoints() <= 0) {
@@ -72,6 +79,25 @@ export class GameViewComponent {
     }
     return 'You have successfully reached the end of this adventure!';
   });
+
+  ngOnInit(): void {
+    const bookId = this.route.snapshot.paramMap.get('id');
+    console.log('GameViewComponent initialized with bookId:', bookId);
+
+    if (bookId) {
+      const book = this.bookService.books().find((b) => String(b.id || b.title) === bookId);
+      if (book) {
+        console.log('Found book:', book);
+        this.gameService.startGame(book);
+      } else {
+        console.warn('Book not found in list. Waiting for books...');
+        this.bookService.loadBooks();
+      }
+    } else {
+      // Se não veio id, redireciona para biblioteca
+      this.router.navigate(['/library']);
+    }
+  }
 
   onMakeChoice(choice: Option | number | string): void {
     this.gameService.makeChoice(choice);

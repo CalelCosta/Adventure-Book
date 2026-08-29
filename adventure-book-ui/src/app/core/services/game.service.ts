@@ -11,12 +11,14 @@ export class GameService {
   private apiUrl = 'http://localhost:8080/api/v1/games';
   private bookService = inject(BookService);
 
+  // Signals
   readonly currentBook = signal<Book | null>(null);
   readonly sessionId = signal<string | null>(null);
   readonly currentSectionId = signal<number | string>(1);
   readonly health = signal<number>(10);
   readonly maxHealth = 10;
   readonly lastConsequenceText = signal<string | null>(null);
+  readonly isLoading = signal<boolean>(false); // <-- NOVO
 
   readonly activeSession = computed(() => {
     const book = this.currentBook();
@@ -36,7 +38,14 @@ export class GameService {
   readonly currentSection = computed<Section | null>(() => {
     const book = this.currentBook();
     if (!book) return null;
-    return book.sections.find((s) => String(s.id) === String(this.currentSectionId())) || null;
+    const sections = book.sections;
+    if (!Array.isArray(sections) || sections.length === 0) {
+      console.warn('Book has no sections:', book);
+      return null;
+    }
+    const found = sections.find((s) => String(s.id) === String(this.currentSectionId()));
+    console.log('currentSection computed:', found);
+    return found || null;
   });
 
   readonly isGameOver = computed(() => {
@@ -49,19 +58,33 @@ export class GameService {
     return section?.type === 'END' && this.health() > 0;
   });
 
+  // Methods
   startGame(book: Book): void {
+    this.isLoading.set(true);
     const bookId = String(book.id || book.title);
+    console.log('Starting game with bookId:', bookId, 'Book:', book);
+
+    // Verifica se o livro tem seções
+    if (!Array.isArray(book.sections) || book.sections.length === 0) {
+      console.error('Book has no sections. Cannot start game.', book);
+      this.isLoading.set(false);
+      return;
+    }
 
     this.http.post<any>(`${this.apiUrl}/start`, { bookId }).subscribe({
       next: (session) => {
+        console.log('Session response:', session);
         this.currentBook.set(book);
         this.sessionId.set(session.id);
         this.currentSectionId.set(session.currentSectionId);
         this.health.set(session.player?.healthPoints ?? 10);
         this.lastConsequenceText.set(null);
+        this.isLoading.set(false);
+        console.log('Current section after set:', this.currentSection());
       },
       error: (err) => {
         console.error('Error starting game session on backend:', err);
+        this.isLoading.set(false);
       },
     });
   }
@@ -126,7 +149,6 @@ export class GameService {
     try {
       const state: GameState = JSON.parse(raw);
       const book = this.bookService.books().find((b) => String(b.id || b.title) === state.bookId);
-
       if (book) {
         this.startGame(book);
         return true;
@@ -144,5 +166,6 @@ export class GameService {
     this.currentSectionId.set(1);
     this.health.set(10);
     this.lastConsequenceText.set(null);
+    this.isLoading.set(false);
   }
 }
