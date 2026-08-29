@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Component
@@ -23,7 +23,7 @@ public class JsonBookLoaderAdapter {
     private final BookValidatorUseCase bookValidator;
     private final BookDtoMapper bookDtoMapper;
 
-    @Value("classpath:books/*.json")
+    @Value("classpath*:books/*.json")
     private Resource[] bookResources;
 
     @PostConstruct

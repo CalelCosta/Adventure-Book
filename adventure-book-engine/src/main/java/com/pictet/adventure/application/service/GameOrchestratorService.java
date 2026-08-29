@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -75,15 +74,15 @@ public class GameOrchestratorService implements StartGameUseCase, MakeChoiceUseC
         return sessionRepository.save(session);
     }
 
-    /**
-     * Utiliza o Pattern Matching for switch do Java 21 para tratar consequências de forma escalável e type-safe.
-     */
     private void applyConsequence(Player player, Consequence consequence) {
-        if (Objects.requireNonNull(consequence) instanceof HealthConsequence hc) {
-            log.info("Applying health consequence: {}", hc.hpChangeValue());
-            player.applyHealthModifier(hc.hpChangeValue());
-        } else {
-            log.warn("Unhandled consequence type: {}", consequence.getClass().getName());
+        switch (consequence) {
+            case HealthConsequence hc -> {
+                log.info("Applying health consequence: {}", hc.hpChangeValue());
+                player.applyHealthModifier(hc.hpChangeValue());
+            }
+            case ItemConsequence ic -> {
+                log.info("Applying item consequence: gain item {}", ic.itemId());
+            }
         }
     }
 }

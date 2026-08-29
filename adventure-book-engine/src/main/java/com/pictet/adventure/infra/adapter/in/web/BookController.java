@@ -1,7 +1,7 @@
 package com.pictet.adventure.infra.adapter.in.web;
 
 import com.pictet.adventure.domain.model.Book;
-import com.pictet.adventure.domain.port.out.BookRepositoryPort;
+import com.pictet.adventure.domain.port.in.ExploreBooksUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,10 +15,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookController {
 
-    private final BookRepositoryPort bookRepository;
+    private final ExploreBooksUseCase exploreBooksUseCase;
 
     @GetMapping
     public ResponseEntity<List<Book>> getBooks() {
-        return ResponseEntity.ok(bookRepository.findAll());
+        return ResponseEntity.ok(exploreBooksUseCase.getAllBooks());
     }
 }

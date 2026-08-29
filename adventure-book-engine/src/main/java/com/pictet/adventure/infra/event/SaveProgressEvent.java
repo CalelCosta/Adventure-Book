@@ -1,4 +1,3 @@
 package com.pictet.adventure.infra.event;
 
-public class SaveProgressEvent {
-}
+public record SaveProgressEvent(String sessionId, int currentSectionId, int playerHp) {}

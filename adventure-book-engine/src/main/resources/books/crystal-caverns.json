@@ -178,7 +178,13 @@
     {
       "id": 666,
       "text": "An unreachable dead end. You shouldn't be here.",
-      "type": "NODE"
+      "type": "NODE",
+      "options": [
+    {
+      "description": "Go back to the beginning",
+      "gotoId": 1
+    }
+  ]
     }
   ]
 }

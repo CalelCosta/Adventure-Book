@@ -1,14 +1,18 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Book, Section, Option, GameState } from '../models/book.model';
 import { BookService } from './book.service';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GameService {
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:8080/api/v1/games';
   private bookService = inject(BookService);
 
   readonly currentBook = signal<Book | null>(null);
+  readonly sessionId = signal<string | null>(null);
   readonly currentSectionId = signal<number | string>(1);
   readonly health = signal<number>(10);
   readonly maxHealth = 10;
@@ -16,9 +20,11 @@ export class GameService {
 
   readonly activeSession = computed(() => {
     const book = this.currentBook();
-    if (!book) return null;
+    const sid = this.sessionId();
+    if (!book || !sid) return null;
     return {
-      id: String(book.id || book.title),
+      id: sid,
+      bookId: String(book.id || book.title),
       currentSectionId: this.currentSectionId(),
       player: {
         healthPoints: this.health(),
@@ -44,45 +50,58 @@ export class GameService {
   });
 
   startGame(book: Book): void {
-    this.currentBook.set(book);
-    const beginSection = book.sections.find((s) => s.type === 'BEGIN') || book.sections[0];
-    this.currentSectionId.set(beginSection ? beginSection.id : 1);
-    this.health.set(10);
-    this.lastConsequenceText.set(null);
+    const bookId = String(book.id || book.title);
+
+    this.http.post<any>(`${this.apiUrl}/start`, { bookId }).subscribe({
+      next: (session) => {
+        this.currentBook.set(book);
+        this.sessionId.set(session.id);
+        this.currentSectionId.set(session.currentSectionId);
+        this.health.set(session.player?.healthPoints ?? 10);
+        this.lastConsequenceText.set(null);
+      },
+      error: (err) => {
+        console.error('Error starting game session on backend:', err);
+      },
+    });
   }
 
   makeChoice(target: Option | number | string): void {
-    if (this.health() <= 0) return;
+    const sid = this.sessionId();
+    if (!sid || this.health() <= 0) return;
 
-    let nextId: number | string;
+    let optionGotoId: number;
 
     if (typeof target === 'object' && target !== null && 'gotoId' in target) {
       const option = target as Option;
-      if (option.consequence) {
-        const { type, value, text } = option.consequence;
-        this.lastConsequenceText.set(text || null);
-        const numVal = Number(value) || 0;
-        if (type === 'LOSE_HEALTH') {
-          this.health.update((hp) => Math.max(0, hp - numVal));
-        } else if (type === 'GAIN_HEALTH') {
-          this.health.update((hp) => Math.min(this.maxHealth, hp + numVal));
-        }
+      optionGotoId = Number(option.gotoId);
+      if (option.consequence?.text) {
+        this.lastConsequenceText.set(option.consequence.text);
       } else {
         this.lastConsequenceText.set(null);
       }
-      nextId = option.gotoId;
     } else {
-      nextId = target as number | string;
+      optionGotoId = Number(target);
+      this.lastConsequenceText.set(null);
     }
 
-    if (this.health() > 0) {
-      this.currentSectionId.set(nextId);
-    }
+    this.http.post<any>(`${this.apiUrl}/${sid}/choice`, { optionGotoId }).subscribe({
+      next: (session) => {
+        this.currentSectionId.set(session.currentSectionId);
+        if (session.player && typeof session.player.healthPoints === 'number') {
+          this.health.set(session.player.healthPoints);
+        }
+      },
+      error: (err) => {
+        console.error('Error processing choice on backend:', err);
+      },
+    });
   }
 
   saveProgress(): void {
     const book = this.currentBook();
-    if (!book) return;
+    const sid = this.sessionId();
+    if (!book || !sid) return;
 
     const state: GameState = {
       bookId: String(book.id || book.title),
@@ -109,12 +128,7 @@ export class GameService {
       const book = this.bookService.books().find((b) => String(b.id || b.title) === state.bookId);
 
       if (book) {
-        this.currentBook.set(book);
-        this.currentSectionId.set(state.currentSectionId);
-        this.health.set(state.health);
-        if (state.lastConsequenceMessage) {
-          this.lastConsequenceText.set(state.lastConsequenceMessage);
-        }
+        this.startGame(book);
         return true;
       }
       return false;
@@ -126,6 +140,7 @@ export class GameService {
 
   clearSession(): void {
     this.currentBook.set(null);
+    this.sessionId.set(null);
     this.currentSectionId.set(1);
     this.health.set(10);
     this.lastConsequenceText.set(null);

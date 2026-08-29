@@ -9,17 +9,17 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-public class InMemoryGameSessionRepository implements GameSessionRepositoryPort {
-    private final Map<String, GameSession> sessions = new ConcurrentHashMap<>();
+public class InMemoryGameSessionRepositoryAdapter implements GameSessionRepositoryPort {
+    private final Map<String, GameSession> storage = new ConcurrentHashMap<>();
 
     @Override
     public GameSession save(GameSession session) {
-        sessions.put(session.getId(), session);
+        storage.put(session.getId(), session);
         return session;
     }
 
     @Override
     public Optional<GameSession> findById(String id) {
-        return Optional.ofNullable(sessions.get(id));
+        return Optional.ofNullable(storage.get(id));
     }
 }

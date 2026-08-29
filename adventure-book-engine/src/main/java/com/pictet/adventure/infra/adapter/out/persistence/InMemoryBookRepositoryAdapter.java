@@ -11,21 +11,21 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-public class InMemoryBookRepository implements BookRepositoryPort {
-    private final Map<String, Book> books = new ConcurrentHashMap<>();
+public class InMemoryBookRepositoryAdapter implements BookRepositoryPort {
+    private final Map<String, Book> storage = new ConcurrentHashMap<>();
+
+    @Override
+    public void save(Book book) {
+        storage.put(book.id(), book);
+    }
 
     @Override
     public Optional<Book> findById(String id) {
-        return Optional.ofNullable(books.get(id));
+        return Optional.ofNullable(storage.get(id));
     }
 
     @Override
     public List<Book> findAll() {
-        return new ArrayList<>(books.values());
-    }
-
-    @Override
-    public void save(Book book) {
-        books.put(book.id(), book);
+        return new ArrayList<>(storage.values());
     }
 }

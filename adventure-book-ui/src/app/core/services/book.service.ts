@@ -7,7 +7,7 @@ import { Book } from '../models/book.model';
 })
 export class BookService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/books';
+  private apiUrl = 'http://localhost:8080/api/v1/books';
 
   readonly books = signal<Book[]>([]);
   readonly isLoading = signal<boolean>(false);

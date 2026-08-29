@@ -69,7 +69,13 @@
     {
       "id": "666",
       "text": "Some unreachable node",
-      "type": "NODE"
+      "type": "NODE",
+      "options": [
+    {
+      "description": "Go back to the beginning",
+      "gotoId": 1
+    }
+  ]
     }
   ]
 }
