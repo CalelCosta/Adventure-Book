@@ -17,7 +17,9 @@ import { CommonModule } from '@angular/common';
         <div class="file-dropzone" (dragover)="$event.preventDefault()" (drop)="onFileDrop($event)">
           <input type="file" accept=".json" #fileInput (change)="onFileSelected($event)" hidden />
           <button class="btn-secondary" (click)="fileInput.click()">Escolher Arquivo JSON</button>
-          <span *if="selectedFile()">{{ selectedFile()?.name }}</span>
+          @if (selectedFile()) {
+            <span>{{ selectedFile()?.name }}</span>
+          }
         </div>
 
         <div class="actions">

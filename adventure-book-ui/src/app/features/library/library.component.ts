@@ -30,24 +30,22 @@ import { BookUploadComponent } from './components/book-upload/book-upload.compon
         />
       </div>
 
-      <div class="books-grid" *ngIf="!isLoading(); else loadingTpl">
-        @for (book of filteredBooks(); track book.id) {
-          <app-book-card [book]="book" (onStart)="startGame($event)"></app-book-card;
-        } @empty {
-          <div class="empty-state">
-            <p>Nenhum livro encontrado.</p>
-          </div>
-        }
-      </div>
-
-      <ng-template #loadingTpl>
+      @if (!isLoading()) {
+        <div class="books-grid">
+          @for (book of filteredBooks(); track book.id) {
+            <app-book-card [book]="book" (onStart)="startGame($event)"></app-book-card>
+          } @empty {
+            <div class="empty-state">
+              <p>Nenhum livro encontrado.</p>
+            </div>
+          }
+        </div>
+      } @else {
         <div class="loading">Carregando histórias...</div>
-      </ng-template>
+      }
 
       @if (showUploadModal()) {
-        <app-book-upload
-          (close)="showUploadModal.set(false)"
-          (upload)="handleFileUpload($event)">
+        <app-book-upload (close)="showUploadModal.set(false)" (upload)="handleFileUpload($event)">
         </app-book-upload>
       }
     </div>
