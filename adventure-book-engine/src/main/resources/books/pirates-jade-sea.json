@@ -15,7 +15,7 @@
         },
         {
           "description": "Interrogate the captured pirate in the brig",
-          "gotoId": 999
+          "gotoId": 20
         }
       ]
     },

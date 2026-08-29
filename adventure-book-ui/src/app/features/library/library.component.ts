@@ -49,11 +49,14 @@ export class LibraryComponent implements OnInit {
 
   getBookDescription(book: Book): string {
     if (book.description) return book.description;
-    const beginSection = book.sections?.find((s) => s.type === 'BEGIN') || book.sections?.[0];
-    return (
-      beginSection?.text ||
-      'Explore an interactive adventure filled with challenging paths and choices.'
-    );
+
+    const sections = book.sections;
+    if (!Array.isArray(sections)) {
+      return 'Explore an interactive adventure filled with challenging paths and choices.';
+    }
+
+    const beginSection = sections.find((s) => s.type === 'BEGIN') || sections[0];
+    return beginSection?.text ?? 'Explore an interactive adventure filled with challenging paths and choices.';
   }
 
   formatDifficulty(diff?: string): string {
