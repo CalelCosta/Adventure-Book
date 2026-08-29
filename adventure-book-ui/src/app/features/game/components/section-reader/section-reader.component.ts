@@ -8,31 +8,33 @@ import { Section, Option } from '../../../../core/models/book.model';
   imports: [CommonModule],
   template: `
     <article class="reader-card">
-      <div class="section-badge">Seção #{{ section.id }}</div>
+      <div class="section-badge">Section #{{ section.id }}</div>
 
       <div class="section-text">
         <p>{{ section.text }}</p>
       </div>
 
-      <div class="choices-container" *ngIf="section.options.length > 0">
-        <h3>O que você fará?</h3>
-        <div class="options-list">
-          @for (option of section.options; track option.gotoId) {
-            <button class="choice-btn" (click)="makeChoice.emit(option.gotoId)">
-              <span class="choice-text">{{ option.text }}</span>
-              @if (option.consequence) {
-                <span
-                  class="consequence-tag"
-                  [class.damage]="option.consequence.type === 'LOSE_HEALTH'"
-                >
-                  {{ option.consequence.type === 'LOSE_HEALTH' ? '-' : '+'
-                  }}{{ option.consequence.value }} HP
-                </span>
-              }
-            </button>
-          }
+      @if (section.options && section.options.length > 0) {
+        <div class="choices-container">
+          <h3>What will you do?</h3>
+          <div class="options-list">
+            @for (option of section.options; track option.gotoId) {
+              <button class="choice-btn" (click)="makeChoice.emit(option)">
+                <span class="choice-text">{{ option.description }}</span>
+                @if (option.consequence) {
+                  <span
+                    class="consequence-tag"
+                    [class.damage]="option.consequence.type === 'LOSE_HEALTH'"
+                  >
+                    {{ option.consequence.type === 'LOSE_HEALTH' ? '-' : '+'
+                    }}{{ option.consequence.value }} HP
+                  </span>
+                }
+              </button>
+            }
+          </div>
         </div>
-      </div>
+      }
     </article>
   `,
   styles: [
@@ -109,5 +111,5 @@ import { Section, Option } from '../../../../core/models/book.model';
 })
 export class SectionReaderComponent {
   @Input({ required: true }) section!: Section;
-  @Output() makeChoice = new EventEmitter<number>();
+  @Output() makeChoice = new EventEmitter<Option>();
 }

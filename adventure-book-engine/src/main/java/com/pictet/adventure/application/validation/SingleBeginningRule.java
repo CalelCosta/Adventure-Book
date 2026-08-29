@@ -15,7 +15,8 @@ public class SingleBeginningRule implements BookValidationRule {
 
         if (beginningCount != 1) {
             throw new IllegalArgumentException(
-                    "Invalid book '%s': Book has none, or more than one beginning".formatted(book.title())
+                    "Invalid book '%s': Book has none, or more than one beginning. Found: %d"
+                            .formatted(book.title(), beginningCount)
             );
         }
     }

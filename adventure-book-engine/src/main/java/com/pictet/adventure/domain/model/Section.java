@@ -7,6 +7,7 @@ import java.util.List;
 public record Section(
         int id,
         SectionType type,
+        String title,
         String text,
         List<Option> options
 ) {

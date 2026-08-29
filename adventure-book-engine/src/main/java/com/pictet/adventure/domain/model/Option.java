@@ -5,7 +5,8 @@ import java.util.Optional;
 public record Option(
         String description,
         int gotoId,
-        Optional<Consequence> consequence
+        Optional<Consequence> consequence,
+        String requirement
 ) {
     public Option {
         // Validation constraint: an option must always point to a valid section id

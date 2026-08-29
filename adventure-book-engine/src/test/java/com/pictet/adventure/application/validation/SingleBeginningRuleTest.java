@@ -24,8 +24,8 @@ class SingleBeginningRuleTest {
     @Test
     @DisplayName("Should pass when book has exactly one BEGIN section")
     void shouldPassWhenBookHasSingleBeginning() {
-        Section begin = new Section(1, SectionType.BEGIN, "Start", List.of());
-        Section end = new Section(2, SectionType.END, "The End", List.of());
+        Section begin = new Section(1, SectionType.BEGIN, "title","Start", List.of());
+        Section end = new Section(2, SectionType.END, "title","The End", List.of());
         Book book = Book.create("1", "Valid Book", "Author", List.of(begin, end));
 
         assertDoesNotThrow(() -> rule.validate(book));
@@ -34,8 +34,8 @@ class SingleBeginningRuleTest {
     @Test
     @DisplayName("Should throw exception when book has no BEGIN section")
     void shouldThrowExceptionWhenBookHasNoBeginning() {
-        Section node = new Section(1, SectionType.NODE, "Middle", List.of());
-        Section end = new Section(2, SectionType.END, "The End", List.of());
+        Section node = new Section(1, SectionType.NODE, "title","Middle", List.of());
+        Section end = new Section(2, SectionType.END, "title","The End", List.of());
         Book book = Book.create("1", "No Begin Book", "Author", List.of(node, end));
 
         IllegalArgumentException exception = assertThrows(
@@ -49,8 +49,8 @@ class SingleBeginningRuleTest {
     @Test
     @DisplayName("Should throw exception when book has multiple BEGIN sections")
     void shouldThrowExceptionWhenBookHasMultipleBeginnings() {
-        Section begin1 = new Section(1, SectionType.BEGIN, "Start 1", List.of());
-        Section begin2 = new Section(2, SectionType.BEGIN, "Start 2", List.of());
+        Section begin1 = new Section(1, SectionType.BEGIN, "title","Start 1", List.of());
+        Section begin2 = new Section(2, SectionType.BEGIN, "title","Start 2", List.of());
         Book book = Book.create("1", "Multi Begin Book", "Author", List.of(begin1, begin2));
 
         assertThrows(IllegalArgumentException.class, () -> rule.validate(book));

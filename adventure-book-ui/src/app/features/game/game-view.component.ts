@@ -1,42 +1,45 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { GameService } from '../../core/services/game.service';
 import { HeaderStatusComponent } from './components/header-status/header-status.component';
 import { SectionReaderComponent } from './components/section-reader/section-reader.component';
 import { GameOverModalComponent } from './components/game-over-modal/game-over-modal.component';
+import { Option } from '../../core/models/book.model';
 
 @Component({
   selector: 'app-game-view',
   standalone: true,
   imports: [CommonModule, HeaderStatusComponent, SectionReaderComponent, GameOverModalComponent],
   template: `
-    <div class="game-container" *ngIf="currentBook() && activeSession(); else loadingTpl">
-      <app-header-status
-        [bookTitle]="currentBook()!.title"
-        [healthPoints]="activeSession()!.player.healthPoints"
-        (exit)="exitGame()"
-      >
-      </app-header-status>
+    @if (currentBook() && currentSection()) {
+      <div class="game-container">
+        <app-header-status
+          [bookTitle]="currentBook()!.title"
+          [healthPoints]="healthPoints()"
+          (exit)="exitGame()"
+          (save)="saveProgress()"
+        >
+        </app-header-status>
 
-      <main *ngIf="currentSection()">
-        <app-section-reader [section]="currentSection()!" (makeChoice)="onMakeChoice($event)">
-        </app-section-reader>
-      </main>
+        <main>
+          <app-section-reader [section]="currentSection()!" (makeChoice)="onMakeChoice($event)">
+          </app-section-reader>
+        </main>
 
-      <app-game-over-modal
-        *ngIf="isGameOver()"
-        [isVictory]="isVictory()"
-        [message]="gameOverMessage()"
-        (restart)="restartGame()"
-        (exit)="exitGame()"
-      >
-      </app-game-over-modal>
-    </div>
-
-    <ng-template #loadingTpl>
-      <div class="loading">Carregando sessão...</div>
-    </ng-template>
+        @if (isGameOver()) {
+          <app-game-over-modal
+            [isVictory]="isVictorious()"
+            [message]="gameOverMessage()"
+            (restart)="restartGame()"
+            (exit)="exitGame()"
+          >
+          </app-game-over-modal>
+        }
+      </div>
+    } @else {
+      <div class="loading">Loading session...</div>
+    }
   `,
   styles: [
     `
@@ -57,52 +60,31 @@ export class GameViewComponent {
   private readonly gameService = inject(GameService);
   private readonly router = inject(Router);
 
-  activeSession = this.gameService.activeSession;
-  currentBook = this.gameService.currentBook;
-  isLoading = signal<boolean>(false);
-
-  currentSection = computed(() => {
-    const book = this.currentBook();
-    const session = this.activeSession();
-    if (!book || !session) return null;
-    return book.sections.find((s) => s.id === session.currentSectionId) || null;
-  });
-
-  isVictory = computed(() => {
-    const section = this.currentSection();
-    const session = this.activeSession();
-    return section?.type === 'END' && !!session?.player && !session.player.isDead;
-  });
-
-  isGameOver = computed(() => {
-    const session = this.activeSession();
-    const section = this.currentSection();
-    if (!session) return false;
-    return session.player.isDead || section?.type === 'END';
-  });
+  readonly currentBook = this.gameService.currentBook;
+  readonly currentSection = this.gameService.currentSection;
+  readonly healthPoints = this.gameService.health;
+  readonly isGameOver = this.gameService.isGameOver;
+  readonly isVictorious = this.gameService.isVictorious;
 
   gameOverMessage = computed(() => {
-    if (this.activeSession()?.player.isDead) {
-      return 'Seus pontos de vida chegaram a zero. A jornada termina aqui.';
+    if (this.healthPoints() <= 0) {
+      return 'Your health points reached zero. Your journey ends here.';
     }
-    return 'Você alcançou o fim desta aventura com sucesso!';
+    return 'You have successfully reached the end of this adventure!';
   });
 
-  onMakeChoice(nextSectionId: number): void {
-    const session = this.activeSession();
-    if (!session || this.isLoading()) return;
+  onMakeChoice(choice: Option | number | string): void {
+    this.gameService.makeChoice(choice);
+  }
 
-    this.isLoading.set(true);
-    this.gameService.makeChoice(session.id, nextSectionId).subscribe({
-      next: () => this.isLoading.set(false),
-      error: () => this.isLoading.set(false),
-    });
+  saveProgress(): void {
+    this.gameService.saveProgress();
   }
 
   restartGame(): void {
     const book = this.currentBook();
     if (book) {
-      this.gameService.startGame(book).subscribe();
+      this.gameService.startGame(book);
     }
   }
 

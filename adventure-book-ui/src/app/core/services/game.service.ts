@@ -1,63 +1,133 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
-import { GameSession, StartGameRequest, MakeChoiceRequest } from '../models/game-session.model';
-import { Book } from '../models/book.model';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { Book, Section, Option, GameState } from '../models/book.model';
+import { BookService } from './book.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GameService {
-  private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/v1/games';
+  private bookService = inject(BookService);
 
-  readonly activeSession = signal<GameSession | null>(null);
   readonly currentBook = signal<Book | null>(null);
+  readonly currentSectionId = signal<number | string>(1);
+  readonly health = signal<number>(10);
+  readonly maxHealth = 10;
+  readonly lastConsequenceText = signal<string | null>(null);
 
-  startGame(book: Book): Observable<GameSession> {
-    const body: StartGameRequest = { bookId: book.id };
-    return this.http.post<GameSession>(`${this.apiUrl}/start`, body).pipe(
-      tap((session) => {
-        this.currentBook.set(book);
-        this.activeSession.set(session);
-        this.saveSessionToLocalStorage(session, book);
-      }),
-    );
+  readonly activeSession = computed(() => {
+    const book = this.currentBook();
+    if (!book) return null;
+    return {
+      id: String(book.id || book.title),
+      currentSectionId: this.currentSectionId(),
+      player: {
+        healthPoints: this.health(),
+        isDead: this.health() <= 0,
+      },
+    };
+  });
+
+  readonly currentSection = computed<Section | null>(() => {
+    const book = this.currentBook();
+    if (!book) return null;
+    return book.sections.find((s) => String(s.id) === String(this.currentSectionId())) || null;
+  });
+
+  readonly isGameOver = computed(() => {
+    const section = this.currentSection();
+    return this.health() <= 0 || section?.type === 'END';
+  });
+
+  readonly isVictorious = computed(() => {
+    const section = this.currentSection();
+    return section?.type === 'END' && this.health() > 0;
+  });
+
+  startGame(book: Book): void {
+    this.currentBook.set(book);
+    const beginSection = book.sections.find((s) => s.type === 'BEGIN') || book.sections[0];
+    this.currentSectionId.set(beginSection ? beginSection.id : 1);
+    this.health.set(10);
+    this.lastConsequenceText.set(null);
   }
 
-  makeChoice(sessionId: string, nextSectionId: number): Observable<GameSession> {
-    const body: MakeChoiceRequest = { nextSectionId };
-    return this.http.post<GameSession>(`${this.apiUrl}/${sessionId}/choice`, body).pipe(
-      tap((updatedSession) => {
-        this.activeSession.set(updatedSession);
-        if (this.currentBook()) {
-          this.saveSessionToLocalStorage(updatedSession, this.currentBook()!);
+  makeChoice(target: Option | number | string): void {
+    if (this.health() <= 0) return;
+
+    let nextId: number | string;
+
+    if (typeof target === 'object' && target !== null && 'gotoId' in target) {
+      const option = target as Option;
+      if (option.consequence) {
+        const { type, value, text } = option.consequence;
+        this.lastConsequenceText.set(text || null);
+        const numVal = Number(value) || 0;
+        if (type === 'LOSE_HEALTH') {
+          this.health.update((hp) => Math.max(0, hp - numVal));
+        } else if (type === 'GAIN_HEALTH') {
+          this.health.update((hp) => Math.min(this.maxHealth, hp + numVal));
         }
-      }),
-    );
+      } else {
+        this.lastConsequenceText.set(null);
+      }
+      nextId = option.gotoId;
+    } else {
+      nextId = target as number | string;
+    }
+
+    if (this.health() > 0) {
+      this.currentSectionId.set(nextId);
+    }
   }
 
-  clearSession(): void {
-    this.activeSession.set(null);
-    this.currentBook.set(null);
-    localStorage.removeItem('adventure_active_session');
-    localStorage.removeItem('adventure_active_book');
-  }
+  saveProgress(): void {
+    const book = this.currentBook();
+    if (!book) return;
 
-  private saveSessionToLocalStorage(session: GameSession, book: Book): void {
-    localStorage.setItem('adventure_active_session', JSON.stringify(session));
-    localStorage.setItem('adventure_active_book', JSON.stringify(book));
+    const state: GameState = {
+      bookId: String(book.id || book.title),
+      currentSectionId: this.currentSectionId(),
+      health: this.health(),
+      maxHealth: this.maxHealth,
+      isGameOver: this.isGameOver(),
+      isVictorious: this.isVictorious(),
+      lastConsequenceMessage: this.lastConsequenceText() || undefined,
+    };
+    localStorage.setItem(`adventure_save_${state.bookId}`, JSON.stringify(state));
   }
 
   loadSessionFromLocalStorage(): boolean {
-    const savedSession = localStorage.getItem('adventure_active_session');
-    const savedBook = localStorage.getItem('adventure_active_book');
+    const keys = Object.keys(localStorage).filter((k) => k.startsWith('adventure_save_'));
+    if (keys.length === 0) return false;
 
-    if (savedSession && savedBook) {
-      this.activeSession.set(JSON.parse(savedSession));
-      this.currentBook.set(JSON.parse(savedBook));
-      return true;
+    const key = keys[0];
+    const raw = localStorage.getItem(key);
+    if (!raw) return false;
+
+    try {
+      const state: GameState = JSON.parse(raw);
+      const book = this.bookService.books().find((b) => String(b.id || b.title) === state.bookId);
+
+      if (book) {
+        this.currentBook.set(book);
+        this.currentSectionId.set(state.currentSectionId);
+        this.health.set(state.health);
+        if (state.lastConsequenceMessage) {
+          this.lastConsequenceText.set(state.lastConsequenceMessage);
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error('Error restoring session:', e);
+      return false;
     }
-    return false;
+  }
+
+  clearSession(): void {
+    this.currentBook.set(null);
+    this.currentSectionId.set(1);
+    this.health.set(10);
+    this.lastConsequenceText.set(null);
   }
 }

@@ -1,0 +1,336 @@
+$bg-cream: #fbf8f3;
+$hero-bg: #3a2a1d;
+$gold-primary: #e2a82b;
+$gold-hover: #cb921f;
+$text-dark: #2c221e;
+$text-muted: #736760;
+$card-bg: #ffffff;
+$border-color: #ede6dd;
+
+.page-wrapper {
+  background-color: $bg-cream;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: $text-dark;
+}
+
+/* Hero Banner */
+.hero-banner {
+  background-color: $hero-bg;
+  background-image: radial-gradient(circle at center, #4d3928 0%, #2a1d13 100%);
+  color: #ffffff;
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  border-bottom: 4px solid $gold-primary;
+
+  .hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .hero-title {
+    font-size: 2.75rem;
+    font-family: Georgia, serif;
+    color: #f1d592;
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #d9ceb9;
+    margin-bottom: 2rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .adventures-badge {
+    display: inline-block;
+    background: rgba(226, 168, 43, 0.15);
+    border: 1px solid rgba(226, 168, 43, 0.4);
+    color: #f1d592;
+    padding: 0.5rem 1.25rem;
+    border-radius: 20px;
+    font-size: 0.95rem;
+  }
+
+  .btn-upload-nav {
+    background: $gold-primary;
+    color: $hero-bg;
+    border: none;
+    padding: 0.55rem 1.25rem;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: $gold-hover;
+    }
+  }
+}
+
+/* Main Library Section */
+.library-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h2 {
+      font-size: 2rem;
+      font-family: Georgia, serif;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: $text-muted;
+      font-size: 1rem;
+    }
+  }
+}
+
+/* Search Bar */
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+
+  .search-input-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 550px;
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.5;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem 1rem 0.8rem 2.8rem;
+      border: 1px solid $border-color;
+      border-radius: 8px;
+      background-color: #f5f0e8;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+
+      &:focus {
+        border-color: $gold-primary;
+        background-color: #ffffff;
+      }
+    }
+  }
+}
+
+/* Filter Pills */
+.filters-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+
+  .filter-label {
+    font-weight: 600;
+    color: $text-muted;
+    font-size: 0.9rem;
+  }
+
+  .pill-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .pill-button {
+    background-color: #eee7de;
+    border: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    color: $text-dark;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #e2d7c8;
+    }
+
+    &.active {
+      background-color: $gold-primary;
+      color: #ffffff;
+      font-weight: bold;
+    }
+  }
+}
+
+/* Books Grid */
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+/* Book Card */
+.book-card {
+  background: $card-bg;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .book-title {
+    font-family: Georgia, serif;
+    font-size: 1.35rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .book-author {
+    color: $text-muted;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .book-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #4a3e37;
+    margin-bottom: 1.25rem;
+  }
+
+  .badges-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    .badge-difficulty {
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: bold;
+
+      &.easy { background: #d4f0df; color: #1e6b37; }
+      &.medium { background: #fef3d6; color: #8a6200; }
+      &.hard { background: #fce4e4; color: #9c2222; }
+    }
+
+    .badge-category {
+      background: #f0eae1;
+      color: $text-dark;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: $text-muted;
+    margin-bottom: 1rem;
+  }
+
+  .tags-row {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+
+    .tag-chip {
+      background-color: #f5f0e8;
+      color: #615349;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+  }
+
+  .btn-begin-quest {
+    width: 100%;
+    background: linear-gradient(180deg, #e7b135 0%, $gold-primary 100%);
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  .modal-card {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+
+    h3 { margin-bottom: 0.5rem; }
+    p { color: $text-muted; font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+    .btn-select-file {
+      background: #f0eae1;
+      border: 1px dashed $text-muted;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .modal-error {
+      color: #c02b2b;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: none;
+      color: $text-muted;
+      cursor: pointer;
+    }
+  }
+}

@@ -1,26 +1,36 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { Book } from '../models/book.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BookService {
-  private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/v1/books';
+  private http = inject(HttpClient);
+  private apiUrl = '/api/books';
 
-  getBooks(): Observable<Book[]> {
-    return this.http.get<Book[]>(this.apiUrl);
+  readonly books = signal<Book[]>([]);
+  readonly isLoading = signal<boolean>(false);
+  readonly errorMessage = signal<string | null>(null);
+
+  loadBooks(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    this.http.get<Book[]>(this.apiUrl).subscribe({
+      next: (data) => {
+        this.books.set(data);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error fetching books from backend:', err);
+        this.errorMessage.set('Failed to load books from server. Please check backend connection.');
+        this.isLoading.set(false);
+      },
+    });
   }
 
-  getBookById(id: string): Observable<Book> {
-    return this.http.get<Book>(`${this.apiUrl}/${id}`);
-  }
-
-  uploadBook(file: File): Observable<Book> {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.http.post<Book>(`${this.apiUrl}/upload`, formData);
+  uploadBookJson(bookData: object) {
+    return this.http.post<Book>(this.apiUrl, bookData);
   }
 }

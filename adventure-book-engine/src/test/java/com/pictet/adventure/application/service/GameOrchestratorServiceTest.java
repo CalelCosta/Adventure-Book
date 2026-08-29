@@ -35,15 +35,15 @@ class GameOrchestratorServiceTest {
 
     @BeforeEach
     void setUp() {
-        Option optToNode = new Option("Go forward", 2, Optional.empty());
+        Option optToNode = new Option("Go forward", 2, Optional.empty(), "requirement");
 
         // Option with -6 HP consequence[cite: 1]
         HealthConsequence damageCons = new HealthConsequence("Trap!", -6);
-        Option optWithDamage = new Option("Touch crystal", 3, Optional.of(damageCons));
+        Option optWithDamage = new Option("Touch crystal", 3, Optional.of(damageCons), "requirement");
 
-        Section begin = new Section(1, SectionType.BEGIN, "Cave Entrance", List.of(optToNode, optWithDamage));
-        Section node = new Section(2, SectionType.NODE, "Tunnel", List.of());
-        Section end = new Section(3, SectionType.END, "Trapped Room", List.of());
+        Section begin = new Section(1, SectionType.BEGIN, "Cave","Cave Entrance", List.of(optToNode, optWithDamage));
+        Section node = new Section(2, SectionType.NODE, "Tunnel","Tunnel", List.of());
+        Section end = new Section(3, SectionType.END, "Trapped Room","Trapped Room", List.of());
 
         mockBook = Book.create("book-123", "Crystal Caverns", "Author", List.of(begin, node, end));
     }

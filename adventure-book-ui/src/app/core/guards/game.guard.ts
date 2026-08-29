@@ -1,14 +1,20 @@
 import { inject } from '@angular/core';
-import { Router, CanActivateFn } from '@angular/router';
+import { CanActivateFn, Router } from '@angular/router';
 import { GameService } from '../services/game.service';
 
 export const gameGuard: CanActivateFn = () => {
   const gameService = inject(GameService);
   const router = inject(Router);
 
-  if (gameService.activeSession() || gameService.loadSessionFromLocalStorage()) {
+  if (gameService.currentBook()) {
     return true;
   }
 
-  return router.createUrlTree(['/library']);
+  const isRestored = gameService.loadSessionFromLocalStorage();
+  if (isRestored && gameService.currentBook()) {
+    return true;
+  }
+
+  router.navigate(['/library']);
+  return false;
 };

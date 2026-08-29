@@ -1,0 +1,110 @@
+<div class="page-wrapper">
+  <!-- Hero Banner -->
+  <header class="hero-banner">
+    <div class="hero-content">
+      <h1 class="hero-title">✨ Adventure Awaits ✨</h1>
+      <p class="hero-subtitle">
+        Embark on epic quests where every choice shapes your destiny. Explore mystical realms, solve ancient mysteries, and become the hero of your own story.
+      </p>
+
+      <div class="hero-actions">
+        <div class="adventures-badge">
+          📖 {{ bookService.books().length }} Epic Adventures Available ✨
+        </div>
+        <button class="btn-upload-nav" (click)="openUploadModal()">
+          ➕ Add New Book
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <section class="library-section">
+    <div class="section-header">
+      <h2>📚 The Adventure Library</h2>
+      <p>Choose your next adventure from our collection of interactive tales. Each book offers unique paths and multiple endings based on your choices.</p>
+    </div>
+
+    <!-- Search Input -->
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          placeholder="Search adventures..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+      </div>
+    </div>
+
+    <!-- Filter Pills -->
+    <div class="filters-container">
+      <span class="filter-label">⚙️ Filters:</span>
+      <div class="pill-group">
+        <button
+          *ngFor="let cat of categories"
+          class="pill-button"
+          [class.active]="selectedCategory() === cat"
+          (click)="selectCategory(cat)">
+          {{ cat }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Books Grid -->
+    <div class="books-grid" *ngIf="!bookService.isLoading() && !bookService.errorMessage()">
+      <div class="book-card" *ngFor="let book of filteredBooks()">
+        <div class="card-body">
+          <h3 class="book-title">{{ book.title }}</h3>
+          <p class="book-author">by {{ book.author || 'Unknown Author' }}</p>
+
+          <p class="book-description">
+            {{ getBookDescription(book) }}
+          </p>
+
+          <div class="badges-row">
+            <span class="badge-difficulty" [ngClass]="formatDifficulty(book.difficulty).toLowerCase()">
+              {{ formatDifficulty(book.difficulty) }}
+            </span>
+          </div>
+
+          <div class="meta-row">
+            <span class="meta-item">📖 {{ book.sections ? book.sections.length : 0 }} chapters</span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button class="btn-begin-quest" (click)="startQuest(book)">
+            ⭐ Begin Quest
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="filteredBooks().length === 0 && !bookService.isLoading()" class="empty-state">
+      <p>No interactive books found matching your criteria.</p>
+    </div>
+  </section>
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay" *ngIf="isUploadModalOpen()">
+    <div class="modal-card">
+      <h3>Import New Book JSON</h3>
+      <p>Select a valid adventure JSON file to upload to the backend validation engine.</p>
+
+      <div class="file-upload-area">
+        <input type="file" accept=".json" (change)="onFileSelected($event)" #fileInput hidden />
+        <button class="btn-select-file" (click)="fileInput.click()">📁 Choose JSON File</button>
+      </div>
+
+      <div class="modal-error" *ngIf="uploadError() as err">
+        ⚠️ {{ err }}
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeUploadModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
