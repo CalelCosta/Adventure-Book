@@ -18,7 +18,7 @@ export class GameService {
   readonly health = signal<number>(10);
   readonly maxHealth = 10;
   readonly lastConsequenceText = signal<string | null>(null);
-  readonly isLoading = signal<boolean>(false); // <-- NOVO
+  readonly isLoading = signal<boolean>(false);
 
   readonly activeSession = computed(() => {
     const book = this.currentBook();
@@ -64,7 +64,6 @@ export class GameService {
     const bookId = String(book.id || book.title);
     console.log('Starting game with bookId:', bookId, 'Book:', book);
 
-    // Verifica se o livro tem seções
     if (!Array.isArray(book.sections) || book.sections.length === 0) {
       console.error('Book has no sections. Cannot start game.', book);
       this.isLoading.set(false);
