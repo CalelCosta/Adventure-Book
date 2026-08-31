@@ -26,7 +26,7 @@ class SingleBeginningRuleTest {
     void shouldPassWhenBookHasSingleBeginning() {
         Section begin = new Section(1, SectionType.BEGIN, "title","Start", List.of());
         Section end = new Section(2, SectionType.END, "title","The End", List.of());
-        Book book = Book.create("1", "Valid Book", "Author", List.of(begin, end));
+        Book book = Book.create("1", "Valid Book", "Author", "MEDIUM", List.of(begin, end));
 
         assertDoesNotThrow(() -> rule.validate(book));
     }
@@ -36,7 +36,7 @@ class SingleBeginningRuleTest {
     void shouldThrowExceptionWhenBookHasNoBeginning() {
         Section node = new Section(1, SectionType.NODE, "title","Middle", List.of());
         Section end = new Section(2, SectionType.END, "title","The End", List.of());
-        Book book = Book.create("1", "No Begin Book", "Author", List.of(node, end));
+        Book book = Book.create("1", "No Begin Book", "Author", "HARD", List.of(node, end));
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
@@ -51,7 +51,7 @@ class SingleBeginningRuleTest {
     void shouldThrowExceptionWhenBookHasMultipleBeginnings() {
         Section begin1 = new Section(1, SectionType.BEGIN, "title","Start 1", List.of());
         Section begin2 = new Section(2, SectionType.BEGIN, "title","Start 2", List.of());
-        Book book = Book.create("1", "Multi Begin Book", "Author", List.of(begin1, begin2));
+        Book book = Book.create("1", "Multi Begin Book", "Author", "EASY", List.of(begin1, begin2));
 
         assertThrows(IllegalArgumentException.class, () -> rule.validate(book));
     }

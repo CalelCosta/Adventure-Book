@@ -31,6 +31,7 @@ public class BookDtoMapper {
                 bookId,
                 dto.title(),
                 dto.author(),
+                dto.difficulty(),
                 sections
         );
     }

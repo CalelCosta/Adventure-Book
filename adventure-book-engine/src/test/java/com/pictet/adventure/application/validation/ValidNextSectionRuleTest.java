@@ -28,7 +28,7 @@ class ValidNextSectionRuleTest {
     void shouldThrowExceptionWhenNextSectionIdIsInvalid() {
         Option invalidOption = new Option("Go to non-existent section", 999, Optional.empty(), "requirement");
         Section begin = new Section(1, SectionType.BEGIN, "Start","Start", List.of(invalidOption));
-        Book book = Book.create("1", "Broken Links Book", "Author", List.of(begin));
+        Book book = Book.create("1", "Broken Links Book", "Author", "EASY", List.of(begin));
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,

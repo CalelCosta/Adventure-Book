@@ -13,15 +13,16 @@ public record Book(
         String id,
         String title,
         String author,
+        String difficulty,
         Map<Integer, Section> sections // Mapped by section ID for O(1) fast lookups
 ) {
 
     // Factory method to create a Book from a List of sections
-    public static Book create(String id, String title, String author, List<Section> sectionList) {
+    public static Book create(String id, String title, String author, String difficulty, List<Section> sectionList) {
         Map<Integer, Section> sectionMap = sectionList.stream()
                 .collect(Collectors.toMap(Section::id, Function.identity()));
 
-        return new Book(id, title, author, sectionMap);
+        return new Book(id, title, author, difficulty,sectionMap);
     }
 
     public Optional<Section> getSection(int sectionId) {

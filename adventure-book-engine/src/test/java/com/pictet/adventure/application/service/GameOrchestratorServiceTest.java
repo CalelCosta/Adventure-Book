@@ -45,7 +45,7 @@ class GameOrchestratorServiceTest {
         Section node = new Section(2, SectionType.NODE, "Tunnel","Tunnel", List.of());
         Section end = new Section(3, SectionType.END, "Trapped Room","Trapped Room", List.of());
 
-        mockBook = Book.create("book-123", "Crystal Caverns", "Author", List.of(begin, node, end));
+        mockBook = Book.create("book-123", "Crystal Caverns", "Author", "EASY", List.of(begin, node, end));
     }
 
     @Test
