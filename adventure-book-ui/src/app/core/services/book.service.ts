@@ -1,8 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Book } from '../models/book.model';
+import { Book, Section } from '../models/book.model';
 import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -20,17 +19,21 @@ export class BookService {
     this.errorMessage.set(null);
 
     this.http
-      .get<Book[]>(this.apiUrl)
+      .get<any[]>(this.apiUrl)
       .pipe(
-        // Normaliza os dados: garante que sections seja sempre um array
         map((books) =>
-          books.map((book) => ({
-            ...book,
-            sections: Array.isArray(book.sections) ? book.sections : [],
-            // Opcional: garante que outros campos opcionais tenham valores padrão
-            description: book.description || '',
-            tags: Array.isArray(book.tags) ? book.tags : [],
-          })),
+          books.map((book) => {
+            let sections: Section[] = [];
+            if (Array.isArray(book.sections)) {
+              sections = book.sections;
+            } else if (book.sections && typeof book.sections === 'object') {
+              sections = Object.values(book.sections);
+            }
+            return {
+              ...book,
+              sections,
+            } as Book;
+          }),
         ),
       )
       .subscribe({
@@ -40,15 +43,13 @@ export class BookService {
         },
         error: (err) => {
           console.error('Error fetching books from backend:', err);
-          this.errorMessage.set(
-            'Failed to load books from server. Please check backend connection.',
-          );
+          this.errorMessage.set('Failed to load books from server.');
           this.isLoading.set(false);
         },
       });
   }
 
-  uploadBookJson(bookData: object): Observable<Book> {
+  uploadBookJson(bookData: object) {
     return this.http.post<Book>(this.apiUrl, bookData);
   }
 }

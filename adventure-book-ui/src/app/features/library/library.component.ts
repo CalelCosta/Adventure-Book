@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BookService } from '../../core/services/book.service';
-import { GameService } from '../../core/services/game.service';
 import { Book } from '../../core/models/book.model';
 
 @Component({
@@ -15,7 +14,6 @@ import { Book } from '../../core/models/book.model';
 })
 export class LibraryComponent implements OnInit {
   readonly bookService = inject(BookService);
-  private gameService = inject(GameService);
   private router = inject(Router);
 
   searchQuery = signal('');
@@ -56,7 +54,10 @@ export class LibraryComponent implements OnInit {
     }
 
     const beginSection = sections.find((s) => s.type === 'BEGIN') || sections[0];
-    return beginSection?.text ?? 'Explore an interactive adventure filled with challenging paths and choices.';
+    return (
+      beginSection?.text ??
+      'Explore an interactive adventure filled with challenging paths and choices.'
+    );
   }
 
   formatDifficulty(diff?: string): string {
@@ -69,8 +70,7 @@ export class LibraryComponent implements OnInit {
   }
 
   startQuest(book: Book): void {
-    this.gameService.startGame(book);
-    this.router.navigate(['/game']);
+    this.router.navigate(['/game', book.id]);
   }
 
   openUploadModal(): void {

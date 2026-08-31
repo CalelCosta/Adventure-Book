@@ -9,9 +9,14 @@ export const routes: Routes = [
       import('./features/library/library.component').then((m) => m.LibraryComponent),
   },
   {
-    path: 'game',
+    path: 'game/:id',
     canActivate: [gameGuard],
     loadComponent: () =>
       import('./features/game/game-view.component').then((m) => m.GameViewComponent),
+  },
+  {
+    path: 'game',
+    redirectTo: 'library',
+    pathMatch: 'full',
   },
 ];

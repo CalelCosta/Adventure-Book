@@ -85,16 +85,25 @@ export class GameViewComponent implements OnInit {
     console.log('GameViewComponent initialized with bookId:', bookId);
 
     if (bookId) {
+      const currentBook = this.gameService.currentBook();
+      if (currentBook && String(currentBook.id || currentBook.title) === bookId) {
+        console.log('Using existing session from GameService');
+        return;
+      }
+
       const book = this.bookService.books().find((b) => String(b.id || b.title) === bookId);
       if (book) {
-        console.log('Found book:', book);
+        console.log('Found book, starting game:', book);
         this.gameService.startGame(book);
       } else {
-        console.warn('Book not found in list. Waiting for books...');
-        this.bookService.loadBooks();
+        console.warn('Book not found in list. Redirecting to library.');
+        this.router.navigate(['/library']);
       }
     } else {
-      // Se não veio id, redireciona para biblioteca
+      if (this.gameService.currentBook()) {
+        console.log('Using existing session without id');
+        return;
+      }
       this.router.navigate(['/library']);
     }
   }
