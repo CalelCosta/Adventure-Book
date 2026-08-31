@@ -9,12 +9,12 @@ import { CommonModule } from '@angular/common';
     <div class="modal-overlay">
       <div class="modal-card" [class.victory]="isVictory">
         <div class="icon">{{ isVictory ? '🏆' : '💀' }}</div>
-        <h2>{{ isVictory ? 'Vitória!' : 'Fim de Jogo' }}</h2>
+        <h2>{{ isVictory ? 'Victory!' : 'Game Over' }}</h2>
         <p>{{ message }}</p>
 
         <div class="actions">
-          <button class="btn-restart" (click)="restart.emit()">Tentar Novamente</button>
-          <button class="btn-library" (click)="exit.emit()">Voltar à Biblioteca</button>
+          <button class="btn-restart" (click)="restart.emit()">Try Again</button>
+          <button class="btn-library" (click)="exit.emit()">Back to Library</button>
         </div>
       </div>
     </div>
